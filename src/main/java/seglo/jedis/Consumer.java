@@ -2,6 +2,8 @@ package seglo.jedis;
 
 import redis.clients.jedis.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class Consumer {
@@ -29,20 +31,29 @@ public class Consumer {
         t.zremrangeByScore(queue, startTime, endTime);
         t.exec();
 
-        Set<String> response = setResponse.get();
-        for (String k : response) {
-            System.out.print("Received key: " + k + ". ");
+        List<String> keys = new ArrayList<String>();
+        keys.addAll(setResponse.get());
+        String[] keyArray = keys.toArray(new String[keys.size()]);
 
+        if (keyArray.length > 0) {
             Transaction tMessage = jedis.multi();
-            Response<String> messageResponse = tMessage.get(k);
-            tMessage.del(k);
+            Response<List<String>> messageResponse = tMessage.mget(keyArray);
+            tMessage.del(keyArray);
             tMessage.exec();
 
-            String message = messageResponse.get();
-            if (message == null) {
-                System.out.println("Message for key " + k + " is gone!");
-            } else {
-                System.out.println("Message for key " + k + " is " + message);
+            List<String> messages = messageResponse.get();
+
+            for (int i = 0; i < messages.size(); i++) {
+                String key = keys.get(i);
+                String message = messages.get(i);
+
+                System.out.print("Received key: " + key + ". ");
+
+                if (message == null) {
+                    System.out.println("Message for key " + key + " is gone!");
+                } else {
+                    System.out.println("Message for key " + key + " is " + message);
+                }
             }
         }
     }
