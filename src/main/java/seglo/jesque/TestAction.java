@@ -1,4 +1,4 @@
-package seglo;
+package seglo.jesque;
 
 import java.util.List;
 
