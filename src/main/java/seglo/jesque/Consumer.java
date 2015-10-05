@@ -14,9 +14,9 @@ import static net.greghaines.jesque.utils.JesqueUtils.map;
 public class Consumer {
     public static void main(String[] args) {
         // Configuration
-        final Config config = new ConfigBuilder().withHost("ubu-vm").build();
+        final Config config = new ConfigBuilder().withHost("ubu-vm").withNamespace("delay-queue").build();
 
-        // Start a worker to run jobs from the queue
+        // Start a worker to run jobs from the "TestAction" delayed queue
         final Worker worker = new WorkerImpl(config,
                 Arrays.asList(TestAction.Name), new MapBasedJobFactory(map(entry(TestAction.Name, TestAction.class))));
 
